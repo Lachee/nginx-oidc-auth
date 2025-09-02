@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/proxy.js",
-    "dev": "ts-node proxy.ts",
+    "start": "node dist/index.js",
+    "dev": "ts-node index.ts",
     "watch": "nodemon -w src --exec ts-node src/index.ts"
   },
   "dependencies": {
