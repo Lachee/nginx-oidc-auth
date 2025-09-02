@@ -126,7 +126,7 @@ app.get('/login', async (req, res) => {
     }
 
     // Build up the redirect url and send them off
-    if (ALLOWED_CLIENTS.length > 0 || !ALLOWED_CLIENTS.includes(client_id)) {
+    if (ALLOWED_CLIENTS.length > 0 && !ALLOWED_CLIENTS.includes(client_id)) {
         console.error('client_id is not on the list of allowed clients.', client_id);
         return res.status(400).send('Client ID is not allowed to use this service.');
     }
