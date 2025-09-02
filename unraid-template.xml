@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>nginx-oidc-auth</Name>
+  <Repository>lachee/nginx-oidc-auth:latest</Repository>
+  <Registry>https://github.com/Lachee/nginx-oidc-auth</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support/>
+  <Project/>
+  <Overview>OpenID Authentication service for NGINX</Overview>
+  <Category/>
+  <WebUI/>
+  <TemplateURL/>
+  <Icon/>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1756776032</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="Port" Target="3600" Default="3600" Mode="tcp" Description="Port service is hosted on and NGINX will use." Type="Port" Display="always" Required="true" Mask="false">3600</Config>
+  <Config Name="JWT Secret" Target="JWT_SECRET" Default="" Mode="" Description="JWT Secret for authentication. &#13;&#10;Leave blank for a random one." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Allowed Clients" Target="ALLOWED_CLIENTS" Default="" Mode="" Description="A CSV of allowed client ids. Leave blank to allow all client ids from nginx." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="Redirect Path" Target="REDIRECT_PATH" Default="/auth/oidc/callback" Mode="" Description="The path which your OIDC provider will redirect back to. Unless changed in the default NGINX configuration, this doesnt need to be changed." Type="Variable" Display="advanced" Required="true" Mask="false">/auth/oidc/callback</Config>
+  <TailscaleStateDir/>
+</Container>
