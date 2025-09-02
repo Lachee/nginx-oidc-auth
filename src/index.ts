@@ -1,24 +1,17 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import session from 'express-session';
 import { BaseClient, Issuer, generators } from 'openid-client';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { getCookies } from './Cookies';
-
-interface UserInfo {
-    'email': string,
-    'email_verified': boolean,
-    'family_name': string,
-    'given_name': string,
-    'name': string,
-    'picture': string,
-    'preferred_username': string,
-    'sub': string,
-}
+import { User } from './User';
 
 declare module 'express-session' {
     interface SessionData {
-        userinfo?: UserInfo;
+        userinfo?: User;
         client_id?: string;
         discovery_url?: string;
         code_verifier?: string;
@@ -27,14 +20,16 @@ declare module 'express-session' {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3600;
-const REDIRECT_PATH = `/auth/oidc/callback`;
+const PORT = +(process.env.PORT || 3600);
+const COOKIE_MAX_AGE = +(process.env.COOKIE_MAX_AGE || 860000);
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
-const COOKIE_MAX_AGE = 860000;
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+const REDIRECT_PATH = process.env.REDIRECT_PATH || '/auth/oidc/callback';
+const ALLOWED_CLIENTS = (process.env.ALLOWED_CLIENTS || "").split(',').filter(t => t.trim());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-    secret: 'your-session-secret', // replace with strong secret in production
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true
 }));
@@ -131,12 +126,16 @@ app.get('/login', async (req, res) => {
     }
 
     // Build up the redirect url and send them off
-    const REDIRECT_URI = getRedirectUri(req);
+    if (ALLOWED_CLIENTS.length > 0 || !ALLOWED_CLIENTS.includes(client_id)) {
+        console.error('client_id is not on the list of allowed clients.', client_id);
+        return res.status(400).send('Client ID is not allowed to use this service.');
+    }
+        
     const client = await getClient(discovery_url, client_id);
     const authorizationUrl = client.authorizationUrl({
         scope: 'openid profile email',
         response_type: 'code',
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: getRedirectUri(req),
         code_challenge: codeChallenge,
         code_challenge_method: 'S256',
         state: req.sessionID
@@ -178,7 +177,7 @@ app.get('/callback', async (req, res) => {
 
         // Fetch user info
         const userinfo = await client.userinfo(tokenSet.access_token as string);
-        req.session.userinfo = userinfo as UserInfo;
+        req.session.userinfo = userinfo as User;
 
         // STEP 4: We redirect the user back to the page they were trying to access
         return res.redirect(getRedirectUri(req, PORT, redirectPath));
