@@ -25,7 +25,7 @@ const COOKIE_MAX_AGE = +(process.env.COOKIE_MAX_AGE || 860000);
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const REDIRECT_PATH = process.env.REDIRECT_PATH || '/auth/oidc/callback';
-const ALLOWED_CLIENTS = (process.env.ALLOWED_CLIENTS || "").split(',').filter(t => t.trim());
+const ALLOWED_CLIENTS = (process.env.ALLOWED_CLIENTS || "").split(',').map(t => t.trim()).filter(t => t != "");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
